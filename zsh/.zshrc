@@ -156,6 +156,10 @@ alias gpl='git pull'
 #===========================================
 # Functions
 #===========================================
+ssm() {
+    ~/.ssh/ssh-menu.sh
+}
+
 # SSH to homelab hosts with tmux
 ssht() {
     ssh -t "$1" "tmux attach || tmux new"
