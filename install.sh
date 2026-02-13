@@ -39,6 +39,9 @@ command -v stow &>/dev/null || {
   brew install stow 2>/dev/null
 }
 
+# Backup existing files that would conflict
+[[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]] && mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
+
 stow -v --target="$HOME" zsh  # adjust package name to your stow structure
 
 echo "Done! Run: exec zsh"
