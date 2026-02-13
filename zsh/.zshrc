@@ -104,6 +104,9 @@ alias mv='mv -i'
 alias vim='nvim'
 alias vi='nvim'
 
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+
 #===========================================
 # Aliases - Infrastructure & DevOps
 #===========================================
