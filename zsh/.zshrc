@@ -1,4 +1,4 @@
-# ~/.zshrc - Raphael's ZSH Configuration with Oh-My-Zsh
+# ~/.zshrc - ZSH Configuration with Oh-My-Zsh
 
 # Enable Powerlevel10k instant prompt (must be at the very top)
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
