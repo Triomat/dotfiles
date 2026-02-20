@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Install zsh if missing
+if ! command -v zsh &>/dev/null; then
+  if command -v apt-get &>/dev/null; then
+    sudo apt-get update -qq && sudo apt-get install -y zsh
+  elif command -v pacman &>/dev/null; then
+    sudo pacman -S --noconfirm zsh
+  elif command -v brew &>/dev/null; then
+    brew install zsh
+  else
+    echo "Cannot install zsh: no supported package manager found." >&2
+    exit 1
+  fi
+fi
+
 # Oh My Zsh (skip if already installed)
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattach
