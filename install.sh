@@ -3,21 +3,31 @@ set -euo pipefail
 
 # Install zsh if missing
 if ! command -v zsh &>/dev/null; then
-  if command -v apt-get &>/dev/null; then
-    sudo apt-get update -qq && sudo apt-get install -y zsh
+  echo "Installing zsh..."
+  if [[ $EUID -eq 0 ]] && command -v apt-get &>/dev/null; then
+    apt-get update -qq
+    apt-get install -y zsh
+  elif command -v apt-get &>/dev/null; then
+    sudo apt-get update -qq
+    sudo apt-get install -y zsh
   elif command -v pacman &>/dev/null; then
     sudo pacman -S --noconfirm zsh
   elif command -v brew &>/dev/null; then
     brew install zsh
   else
-    echo "Cannot install zsh: no supported package manager found." >&2
+    echo "Error: cannot install zsh automatically. Run: sudo apt-get install -y zsh" >&2
+    exit 1
+  fi
+  # Verify install succeeded
+  if ! command -v zsh &>/dev/null; then
+    echo "Error: zsh installation failed. Run: sudo apt-get install -y zsh" >&2
     exit 1
   fi
 fi
 
 # Oh My Zsh (skip if already installed)
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattach
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 fi
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
@@ -37,7 +47,7 @@ done
 [[ -d "$ZSH_CUSTOM/themes/powerlevel10k" ]] || \
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
 
-# Clone and stow dotfiles (adjust repo URL)
+# Clone and stow dotfiles
 DOTFILES_DIR="$HOME/.dotfiles"
 REPO="https://github.com/Triomat/dotfiles.git"
 
@@ -46,16 +56,26 @@ if [[ ! -d "$DOTFILES_DIR" ]]; then
 fi
 
 cd "$DOTFILES_DIR"
+
 # Install stow if missing
-command -v stow &>/dev/null || {
-  sudo apt-get update && sudo apt-get install -y stow 2>/dev/null || \
-  sudo pacman -S --noconfirm stow 2>/dev/null || \
-  brew install stow 2>/dev/null
-}
+if ! command -v stow &>/dev/null; then
+  if [[ $EUID -eq 0 ]] && command -v apt-get &>/dev/null; then
+    apt-get install -y stow
+  elif command -v apt-get &>/dev/null; then
+    sudo apt-get install -y stow
+  elif command -v pacman &>/dev/null; then
+    sudo pacman -S --noconfirm stow
+  elif command -v brew &>/dev/null; then
+    brew install stow
+  else
+    echo "Error: cannot install stow automatically." >&2
+    exit 1
+  fi
+fi
 
 # Backup existing files that would conflict
 [[ -f "$HOME/.zshrc" && ! -L "$HOME/.zshrc" ]] && mv "$HOME/.zshrc" "$HOME/.zshrc.bak"
 
-stow -v --target="$HOME" zsh  # adjust package name to your stow structure
+stow -v --target="$HOME" zsh
 
 echo "Done! Run: exec zsh"
